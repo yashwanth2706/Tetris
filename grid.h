@@ -1,4 +1,4 @@
-#pragma once //avaoids duplicate definitions
+#pragma once //avoids duplicate definitions
 #include<vector>
 #include<raylib.h>
 
