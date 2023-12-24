@@ -1,0 +1,30 @@
+echo > Setup required Environment
+echo -------------------------------------
+SET RAYLIB_PATH=C:\raylib\raylib
+SET COMPILER_PATH=C:\raylib\w64devkit\bin
+ENV_SET PATH=$(COMPILER_PATH)
+SET CC=g++
+SET CFLAGS=-Wall -IC:\raylib\raylib\src -Iexternal -DPLATFORM_DESKTOP
+SET LDFLAGS=-lraylib -lopengl32 -lgdi32 -lwinmm
+cd $(CURRENT_DIRECTORY)
+echo
+echo > Clean latest build
+echo ------------------------
+cmd /c IF EXIST $(NAME_PART).exe del /F $(NAME_PART).exe
+echo
+echo > Saving Current File
+echo -------------------------
+npp_save
+echo
+echo > Compile program
+echo -----------------------
+$(CC) --version
+$(CC) -o $(NAME_PART).exe main.cpp grid.cpp colors.cpp position.cpp blocks.cpp block.cpp game.cpp $(CFLAGS) $(LDFLAGS)
+echo
+echo > Reset Environment
+echo --------------------------
+ENV_UNSET PATH
+echo
+echo > Execute program
+echo -----------------------
+cmd /c IF EXIST $(NAME_PART).exe $(NAME_PART).exe
