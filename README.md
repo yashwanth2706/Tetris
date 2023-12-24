@@ -8,4 +8,4 @@ Tetris game using Raylib
 <br>3. Make sure you have downloaded Notepad++ in your System</br>
 <br>4. Download Tetris project into your System from https://github.com/yashwanth2706/Tetris</br>
 <br>5. In Notepad++ Open Tetris/main.cpp file and press f6 key in your keyboard</br>
-<br>6. Copy Paste the script from script.txt into the prompt for compilation process (Remove existing script if any) and save the script.</br>
+<br>6. Copy Paste the script from script.txt available in -> (Tetris/script.txt) into the prompt for compilation process (Remove existing script if any) and save the script.</br>
