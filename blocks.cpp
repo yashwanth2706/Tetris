@@ -83,3 +83,15 @@ class ZBlock :public Block{
             Move(0,3);
         }
 };
+
+class CBlock :public Block{
+    public:
+        CBlock() {
+            id = 8;
+            cells[0] = {Position(0,0), Position(0,1), Position(1,1)};
+            cells[1] = {Position(0,1), Position(1,1), Position(1,0)};
+            cells[2] = {Position(1,1), Position(1,0), Position(0,0)};
+            cells[3] = {Position(1,0), Position(0,0), Position(0,1)};
+            Move(0,3);
+        }
+};
