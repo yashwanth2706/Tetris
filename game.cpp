@@ -13,12 +13,14 @@ Game::Game() {
     PlayMusicStream(music);
     rotateSound = LoadSound("Sounds/rotate.mp3");
     clearSound = LoadSound("Sounds/clear.mp3");
+    gameOverSound = LoadSound("Sounds/game-over.wav");
 }
 
 Game::~Game() {
     UnloadSound(rotateSound);
     UnloadSound(clearSound);
     UnloadMusicStream(music);
+    UnloadSound(gameOverSound);
     CloseAudioDevice();
 }
 
@@ -143,6 +145,7 @@ void Game::LockBlock() {
     currentBlock = nextBlock;
     if(BlockFits() == false) {
         gameOver = true;
+        PlaySound(gameOverSound);
     }
     nextBlock = GetRandomBlock();
     int rowsCleared = grid.ClearFullRows();
