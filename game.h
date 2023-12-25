@@ -31,4 +31,5 @@ class Game{
     Block nextBlock;
     Sound rotateSound;
     Sound clearSound;
+    Sound gameOverSound;
 };
