@@ -12,6 +12,5 @@
 #g++ main.cpp game.cpp grid.cpp position.cpp colors.cpp block.cpp blocks.cpp -o TetrisGame -L/home/yashwanth/raylib -lraylib -lGL -lm -lpthread -ldl -lrt -lX11
 #--------------------------------------------------------------------------------------------------------------------------------------------------------------
 
-
 #When raylib is made available systemwide below command works
 g++ main.cpp game.cpp grid.cpp position.cpp colors.cpp block.cpp blocks.cpp -o TetrisGame -lraylib -lGL -lm -lpthread -ldl -lrt -lX11
