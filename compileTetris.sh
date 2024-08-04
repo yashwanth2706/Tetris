@@ -13,4 +13,5 @@
 #--------------------------------------------------------------------------------------------------------------------------------------------------------------
 
 #When raylib is made available systemwide below command works
+echo "Compiling output to binary file named TetrisGame"
 g++ main.cpp game.cpp grid.cpp position.cpp colors.cpp block.cpp blocks.cpp -o TetrisGame -lraylib -lGL -lm -lpthread -ldl -lrt -lX11
