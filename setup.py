@@ -1,11 +1,3 @@
-# Known bugs in different OS's
-# [Linux] Cmake version needs to be >= 3.25 to compile Raylib if not comilation will fail
-# [Linux] compile_game_linux function will always tries to download newer version even if it is available in system
-# [Linux] check_and_install_latest_cmake may this function has some issues cheking cmake version
-# [Windows] Worksfine so far...
-# [MacOS] Unknown
-# [Unknown OS] Unknown
-
 import os
 import platform
 import subprocess
@@ -17,21 +9,17 @@ import sys
 LOG_FILE = "compileandrun.log"
 RAYLIB_REPO_ZIP = "https://github.com/raysan5/raylib/archive/refs/heads/master.zip"
 
-
 def log(message):
     with open(LOG_FILE, "a") as logf:
         logf.write(message + "\n")
     print(message)
 
-
 def clear_log():
     with open(LOG_FILE, "w") as logf:
         logf.write("")
 
-
 def is_raylib_present(path):
     return (path / "src" / "raylib.h").exists()
-
 
 def scan_home_for_raylib():
     system = platform.system()
@@ -61,7 +49,6 @@ def scan_home_for_raylib():
     log("raylib not found in scanned directories.")
     return None
 
-
 def download_and_extract_raylib(dest_dir):
     zip_path = dest_dir / "raylib.zip"
     log(f"Downloading raylib from {RAYLIB_REPO_ZIP}...")
@@ -73,51 +60,27 @@ def download_and_extract_raylib(dest_dir):
     log(f"raylib extracted to {extracted}")
     return extracted.resolve()
 
-
-def check_and_install_latest_cmake():
-    version_ok = False
-    try:
-        output = subprocess.check_output(["cmake", "--version"]).decode()
-        current_version = output.split(" ")[2].strip()
-        log(f"System CMake version: {current_version}")
-        version_parts = current_version.split(".")
-        major = int(version_parts[0])
-        minor = int(version_parts[1]) if len(version_parts) > 1 else 0
-        patch = int(version_parts[2]) if len(version_parts) > 2 else 0
-        version_ok = (major > 3 or (major == 3 and minor >= 25))
-    except Exception as e:
-        log(f"Error checking cmake version: {e}")
-
-    if not version_ok:
-        log("System cmake is too old. Installing newer version...")
-        cmake_url = "https://github.com/Kitware/CMake/releases/download/v3.27.0/cmake-3.27.0-linux-x86_64.sh"
-        cmake_script = Path("/tmp/cmake-install.sh")
-        urllib.request.urlretrieve(cmake_url, cmake_script)
-        install_dir = Path.home() / ".local" / "cmake"
-        install_dir.mkdir(parents=True, exist_ok=True)
-        subprocess.run(["bash", cmake_script, "--skip-license", f"--prefix={install_dir}"], check=True)
-        os.environ["PATH"] = f"{install_dir}/bin:" + os.environ["PATH"]
-        log("CMake installed successfully.")
-
-
 def build_raylib_linux(raylib_path):
-    build_dir = raylib_path / "build"
-    build_dir.mkdir(exist_ok=True)
-    os.chdir(build_dir)
+    # No cmake, plain make if available
+    src_dir = raylib_path / "src"
+    os.chdir(src_dir)
     try:
-        subprocess.run(["cmake", "-DPLATFORM=Desktop", ".."], check=True)
-        subprocess.run(["make", f"-j{os.cpu_count()}"], check=True)
-        subprocess.run(["sudo", "make", "install"], check=True)
-        log("raylib compiled and installed on Linux.")
+        subprocess.run(["make"], check=True)
+        log("raylib compiled using plain `make` in src directory.")
+        # Optionally install, if needed:
+        # subprocess.run(["sudo", "make", "install"], check=True)
+        log("raylib built on Linux.")
     except subprocess.CalledProcessError as e:
         log(f"Error building raylib on Linux: {e}")
         sys.exit(1)
 
-
 def compile_game_linux(raylib_path):
     source_dir = Path(__file__).parent.resolve()
     source_files = ["main.cpp", "game.cpp", "grid.cpp", "position.cpp", "colors.cpp", "block.cpp", "blocks.cpp"]
-    compile_cmd = ["g++"] + [str(source_dir / f) for f in source_files] + ["-o", "TetrisGame", "-lraylib", "-lGL", "-lm", "-lpthread", "-ldl", "-lrt", "-lX11"]
+    compile_cmd = ["g++"] + [str(source_dir / f) for f in source_files] + [
+        "-o", "TetrisGame", "-I" + str(raylib_path / "src"), "-L" + str(raylib_path / "src"),
+        "-lraylib", "-lGL", "-lm", "-lpthread", "-ldl", "-lrt", "-lX11"
+    ]
     try:
         subprocess.run(compile_cmd, check=True)
         log("TetrisGame compiled successfully.")
@@ -125,7 +88,6 @@ def compile_game_linux(raylib_path):
         log("Game executed successfully.")
     except subprocess.CalledProcessError as e:
         log(f"Compilation or execution failed: {e}")
-
 
 def compile_game_windows(raylib_path):
     compiler_path = next(raylib_path.glob("**/w64devkit/bin"), None)
@@ -185,7 +147,6 @@ def compile_game_windows(raylib_path):
     except subprocess.CalledProcessError as e:
         log(f"Compilation or execution failed: {e}")
 
-
 def main():
     clear_log()
     log("==== RAYLIB BUILD AUTOMATION SCRIPT START ====")
@@ -200,7 +161,7 @@ def main():
         input_path = input()
     raylib_path = Path(input_path)
     if not is_raylib_present(raylib_path):
-        log("Checking for ralylib")
+        log("Checking for raylib")
         raylib_path = None
 
     if not raylib_path:
@@ -213,7 +174,6 @@ def main():
     log(f"Using raylib at {raylib_path}")
 
     if system == "Linux":
-        check_and_install_latest_cmake()
         build_raylib_linux(raylib_path)
         compile_game_linux(raylib_path)
     elif system == "Windows":
@@ -223,7 +183,5 @@ def main():
 
     log("==== SCRIPT END ====")
 
-
 if __name__ == "__main__":
     main()
-
