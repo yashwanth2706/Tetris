@@ -21,16 +21,27 @@ def clear_log():
 def is_raylib_present(path):
     return (path / "src" / "raylib.h").exists()
 
-def scan_home_for_raylib():
+def scan_home_for_raylib(precompiled):
     system = platform.system()
     log("Scanning for raylib/src/raylib.h ...")
     search_dirs = []
 
     if system == "Windows":
+        if precompiled:
+            log("User input [Pre-Compiled for Windows] running compiled file")
+            subprocess.run(["TetriesGame.exe"])
+            return
         search_dirs = [Path("C:/"), Path("D:/"), Path("E:/"), Path("F:/"), Path.home()]
     elif system == "Linux":
+        if precompiled:
+            log("User input [Pre-Compiled for Linux] running compiled file")
+            subprocess.run(["./TetriesGame"])
+            return
         search_dirs = [Path.home(), Path("/usr/local"), Path("/opt")]
     elif system == "Darwin":
+        if precompiled:
+            log("User input [Pre-Compiled for MacOS] Option Not Support for MacOS")
+            return
         search_dirs = [Path.home(), Path("/usr/local"), Path("/opt")]
     else:
         log(f"Unknown OS: {system}. Scanning only home directory.")
@@ -67,8 +78,7 @@ def build_raylib_linux(raylib_path):
     try:
         subprocess.run(["make"], check=True)
         log("raylib compiled using plain `make` in src directory.")
-        # Optionally install, if needed:
-        # subprocess.run(["sudo", "make", "install"], check=True)
+        subprocess.run(["sudo", "make", "install"], check=True)
         log("raylib built on Linux.")
     except subprocess.CalledProcessError as e:
         log(f"Error building raylib on Linux: {e}")
@@ -154,18 +164,23 @@ def main():
     system = platform.system()
     raylib_path = None
 
-    input_path = input("Select an option:\n 1: Auto scan for Raylib?\n 2: Enter full raylib path:\n[WINDOWS] Example: C:/raylib/src/raylib.h\n[LINUX] Example: home/user/raylib/src/raylib.h\n")
+    input_path = input("Select an option:\n 1: Auto scan for Raylib?\n 2: Enter full raylib path:\n[WINDOWS] Example: C:/raylib/src/raylib.h\n[LINUX] Example: home/user/raylib/src/raylib.h\n 3: Select if precompiled\n")
     if input_path == "1":
         input_path = "C:/"
-    if input_path == "2":
+    elif input_path == "2":
         input_path = input()
+    elif input_path == "3":
+        scan_home_for_raylib(True)
+    else:
+        log("Input Invalid\n")
+        
     raylib_path = Path(input_path)
     if not is_raylib_present(raylib_path):
         log("Checking for raylib")
         raylib_path = None
 
     if not raylib_path:
-        raylib_path = scan_home_for_raylib()
+        raylib_path = scan_home_for_raylib(False)
 
     if not raylib_path:
         log("raylib not found. Downloading...")
