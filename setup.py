@@ -23,29 +23,30 @@ def is_raylib_present(path):
 
 def scan_home_for_raylib(precompiled):
     system = platform.system()
-    log("Scanning for raylib/src/raylib.h ...")
+
     search_dirs = []
 
     if system == "Windows":
         if precompiled:
             log("User input [Pre-Compiled for Windows] running compiled file")
             subprocess.run(["TetrisGame.exe"])
-            return
+            exit()
         search_dirs = [Path("C:/"), Path("D:/"), Path("E:/"), Path("F:/"), Path.home()]
     elif system == "Linux":
         if precompiled:
             log("User input [Pre-Compiled for Linux] running compiled file")
             subprocess.run(["./TetrisGame"])
-            return
+            exit()
         search_dirs = [Path.home(), Path("/usr/local"), Path("/opt")]
     elif system == "Darwin":
         if precompiled:
             log("User input [Pre-Compiled for MacOS] Option Not Support for MacOS")
-            return
+            exit()
         search_dirs = [Path.home(), Path("/usr/local"), Path("/opt")]
     else:
         log(f"Unknown OS: {system}. Scanning only home directory.")
         search_dirs = [Path.home()]
+    log("Scanning for raylib/src/raylib.h ...")
 
     for dir in search_dirs:
         if not dir.exists():
@@ -166,35 +167,37 @@ def main():
 
     input_path = input("Select an option:\n 1: Auto scan for Raylib?\n 2: Enter full raylib path:\n[WINDOWS] Example: C:/raylib/src/raylib.h\n[LINUX] Example: home/user/raylib/src/raylib.h\n 3: Select if precompiled\n")
     if input_path == "1":
-        input_path = "C:/"
+        scan_home_for_raylib(False)
     elif input_path == "2":
         input_path = input()
+        raylib_path = Path(input_path)
+        if not is_raylib_present(raylib_path):
+            log("Checking for raylib")
+            raylib_path = None
+        if not raylib_path:
+            raylib_path = scan_home_for_raylib(False)
+        if not raylib_path:
+            log("raylib not found. Downloading...")
+            raylib_path = download_and_extract_raylib(Path.cwd())
     elif input_path == "3":
         scan_home_for_raylib(True)
     else:
         log("Input Invalid\n")
         
-    raylib_path = Path(input_path)
-    if not is_raylib_present(raylib_path):
-        log("Checking for raylib")
-        raylib_path = None
+    if not input_path == "3":
 
-    if not raylib_path:
-        raylib_path = scan_home_for_raylib(False)
+        log(f"Using raylib at {raylib_path}")
 
-    if not raylib_path:
-        log("raylib not found. Downloading...")
-        raylib_path = download_and_extract_raylib(Path.cwd())
-
-    log(f"Using raylib at {raylib_path}")
-
-    if system == "Linux":
-        build_raylib_linux(raylib_path)
-        compile_game_linux(raylib_path)
-    elif system == "Windows":
-        compile_game_windows(raylib_path)
-    else:
-        log("Unsupported operating system.")
+        if system == "Linux":
+            build_raylib_linux(raylib_path)
+            compile_game_linux(raylib_path)
+        elif system == "Windows":
+            compile_game_windows(raylib_path)
+        else:
+            log("Unsupported operating system.")
+            
+    def exit():
+        exit(0)
 
     log("==== SCRIPT END ====")
 
