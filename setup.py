@@ -29,13 +29,13 @@ def scan_home_for_raylib(precompiled):
     if system == "Windows":
         if precompiled:
             log("User input [Pre-Compiled for Windows] running compiled file")
-            subprocess.run(["TetriesGame.exe"])
+            subprocess.run(["TetrisGame.exe"])
             return
         search_dirs = [Path("C:/"), Path("D:/"), Path("E:/"), Path("F:/"), Path.home()]
     elif system == "Linux":
         if precompiled:
             log("User input [Pre-Compiled for Linux] running compiled file")
-            subprocess.run(["./TetriesGame"])
+            subprocess.run(["./TetrisGame"])
             return
         search_dirs = [Path.home(), Path("/usr/local"), Path("/opt")]
     elif system == "Darwin":
