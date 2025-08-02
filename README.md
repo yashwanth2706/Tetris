@@ -3,13 +3,12 @@ Tetris game using Raylib with C and C++
 <img src ="https://github.com/yashwanth2706/Tetris/blob/main/Tetris_Game_Image.png"></img>
 
 # Setup: (Windows/Linux/MacOS)
-Make sure you have git installed in your system
 --------------------------------------------------------------------------------------------------------
 Download Raylib for your OS (Optional but Recommended)<br>                                                                
 If downloaded Raylib in Windows add it to C:/  (Recommended) for faster detection<br>
 If downloaded Raylib in Linux select option 2 when running the script and enter/paste the absolute path to raylib.h<br>
 If these steps are not done no problem `setup.py` will do all the neccessary setps to run the project<br>
-### For MacOS script is Untested
+### For MacOS the script is untested
 ----------------------------------------------------------------------------------------------------------
 
 # Steps to run the project
