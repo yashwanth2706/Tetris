@@ -6,7 +6,10 @@ import platform
 
 print("\nAuto-detecting raylib installation...")
 
-given = Path(sys.argv[1]) if len(sys.argv) > 1 else Path(r"C:\raylib")
+system = platform.system().lower()
+
+default_path = Path(r"C:\raylib") if "windows" in system else Path("~/")
+given = Path(sys.argv[1]) if len(sys.argv) > 1 else default_path
 given = given.resolve()
 
 def find_raylib_root(start: Path) -> Path | None:
@@ -29,12 +32,26 @@ else:
 if not raylib_root:
     print("\nERROR: Could not find raylib.")
     print("Expected structure: <root>/raylib/src/raylib.h\n")
+    print("ERROR: libraylib.a not found. Build raylib first:")
+    print("  cd raylib/src && make PLATFORM=PLATFORM_DESKTOP")
+    check = input("[Recommended] setup will automatically install raylib and it's dependecies proceed (y/N)? :")
+    if check.lower() == "y":
+        try:
+            subprocess.check_call(["sh", "dependencies.sh"])
+            subprocess.check_call(["sh", "compileTetris.sh"])
+            # raylib_src = 
+        except (subprocess.CalledProcessError, OSError):
+            print("Failed to install dependencies or build raylib.")
+            sys.exit(1)
+    elif check.lower() == "n":
+        print("Aborted\n")
+        sys.exit(1)
+    else:
+        print(f"Aborted, unknown command: {check} run setup again and privide the right input\n")
+        sys.exit(1)
     sys.exit(1)
 
 raylib_src = raylib_root / "raylib" / "src"
-
-# Detect OS
-system = platform.system().lower()
 
 project = Path.cwd()
 output = project.name
@@ -104,24 +121,62 @@ else:
         env = os.environ.copy()
     else:
         print("[!] pkg-config not found or no raylib package. Linking manually.")
-        # Expect: libraylib.a exists in raylib_src
-        lib_file = raylib_src / "libraylib.a"
-        if not lib_file.exists():
+        # Look for libraylib.a in the project source first, then common system locations
+        candidates = [
+            raylib_src / "libraylib.a",
+            Path("/usr/local/lib") / "libraylib.a",
+            Path("/usr/lib") / "libraylib.a",
+            Path("/usr/lib/x86_64-linux-gnu") / "libraylib.a",
+        ]
+        lib_file = None
+        for p in candidates:
+            if p.exists():
+                lib_file = p
+                break
+
+        if not lib_file:
             print("ERROR: libraylib.a not found. Build raylib first:")
             print("  cd raylib/src && make PLATFORM=PLATFORM_DESKTOP")
-            sys.exit(1)
+            check = input("[Recommended] setup will automatically install raylib and it's dependecies proceed (y/N)? :")
+            if check.lower() == "y":
+                try:
+                    subprocess.check_call(["sh", "dependencies.sh"])
+                    subprocess.check_call(["sh", "compileTetris.sh"])
+                    # After attempting automatic build, try to locate again in common locations
+                    for p in candidates:
+                        if p.exists():
+                            lib_file = p
+                            break
+                    if not lib_file:
+                        print("Failed to locate libraylib.a after build/install.")
+                        sys.exit(1)
+                except (subprocess.CalledProcessError, OSError):
+                    print("Failed to install dependencies or build raylib.")
+                    sys.exit(1)
+            elif check.lower() == "n":
+                print("Aborted\n")
+                sys.exit(1)
+            else:
+                print(f"Aborted, unknown command: {check} run setup again and privide the right input\n")
+                sys.exit(1)
+
+        # If libraylib.a was found in a system path, prefer system include dir when available
+        if lib_file and lib_file.parent != raylib_src and Path("/usr/local/include").exists():
+            include_path = Path("/usr/local/include")
+        else:
+            include_path = raylib_src
 
         cflags = [
             "-Wall", "-std=c++17", "-DPLATFORM_DESKTOP",
-            f"-I{raylib_src}",
+            f"-I{include_path}",
         ]
         if external.exists():
             cflags.append(f"-I{external}")
 
-        ldflags = [
-            f"{lib_file}",
-            "-lGL", "-lm", "-lpthread", "-ldl", "-lrt", "-lX11"
-        ]
+        # Link against the static archive directly (full path) or let linker find it via -L/-l
+        ldflags = [str(lib_file)] if lib_file else []
+        # Add usual system libs
+        ldflags += ["-lGL", "-lm", "-lpthread", "-ldl", "-lrt", "-lX11"]
 
         cmd = ["g++", "-o", output] + sources + cflags + ldflags
         env = os.environ.copy()
