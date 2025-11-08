@@ -4,6 +4,9 @@ import subprocess
 from pathlib import Path
 import platform
 
+print("If raylib is not installed please install it from: https://www.raylib.com/")
+print("For Windows it is suggested that you install Raylib in C:/")
+print("For linux (Debian based only) this script automatically installs raylib and compiles also runs if success")
 print("\nAuto-detecting raylib installation...")
 
 system = platform.system().lower()
