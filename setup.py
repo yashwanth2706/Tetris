@@ -8,6 +8,21 @@ print("\nAuto-detecting raylib installation...")
 
 system = platform.system().lower()
 
+if system == "windows":
+    print("Detected platform: Windows\n")
+    print("Usage: python setup.py [PATH_TO_RAYLIB_ROOT_or_raylib.h]")
+    print(" - Provide the raylib root directory (the folder that contains 'raylib/src/raylib.h')")
+    print(" - Or provide the full path to 'raylib.h' (example: C:/raylib/raylib/src/raylib.h)\n")
+    print("Examples:")
+    print("python setup.py C:/raylib")
+    print("python setup.py D:/dev/raylib")
+    print("python setup.py C:/path/to/raylib/raylib/src/raylib.h\n")
+    print("If no argument is given, the script will default to C:\\raylib.\n")
+    print("If only the Drive name is given without the raylib folder / directry the setup will exit\n Below is the example")
+    print("python setup.py C:/ <--- This won't work!")
+    print("python setup.py D:/ <--- This won't work!")
+    print("python setup.py <DIR>:/ <--- This won't work! | DIR=C,D,E,F,G,<Any Valid Drive Name in Windows>...etc")
+
 default_path = Path(r"C:\raylib") if "windows" in system else Path("~/")
 given = Path(sys.argv[1]) if len(sys.argv) > 1 else default_path
 given = given.resolve()
@@ -32,23 +47,24 @@ else:
 if not raylib_root:
     print("\nERROR: Could not find raylib.")
     print("Expected structure: <root>/raylib/src/raylib.h\n")
-    print("ERROR: libraylib.a not found. Build raylib first:")
-    print("  cd raylib/src && make PLATFORM=PLATFORM_DESKTOP")
-    check = input("[Recommended] setup will automatically install raylib and it's dependecies proceed (y/N)? :")
-    if check.lower() == "y":
-        try:
-            subprocess.check_call(["sh", "dependencies.sh"])
-            subprocess.check_call(["sh", "compileTetris.sh"])
-            # raylib_src = 
-        except (subprocess.CalledProcessError, OSError):
-            print("Failed to install dependencies or build raylib.")
+    if not system == "windows":
+        print("ERROR: libraylib.a not found. Build raylib first:")
+        print("  cd raylib/src && make PLATFORM=PLATFORM_DESKTOP")
+        check = input("[Recommended] setup will automatically install raylib and it's dependecies proceed (y/N)? :")
+        if check.lower() == "y":
+            try:
+                subprocess.check_call(["sh", "dependencies.sh"])
+                subprocess.check_call(["sh", "compileTetris.sh"])
+                # raylib_src = 
+            except (subprocess.CalledProcessError, OSError):
+                print("Failed to install dependencies or build raylib.")
+                sys.exit(1)
+        elif check.lower() == "n":
+            print("Aborted\n")
             sys.exit(1)
-    elif check.lower() == "n":
-        print("Aborted\n")
-        sys.exit(1)
-    else:
-        print(f"Aborted, unknown command: {check} run setup again and privide the right input\n")
-        sys.exit(1)
+        else:
+            print(f"Aborted, unknown command: {check} run setup again and privide the right input\n")
+            sys.exit(1)
     sys.exit(1)
 
 raylib_src = raylib_root / "raylib" / "src"
