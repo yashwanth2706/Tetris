@@ -1,6 +1,6 @@
-# Tetris
-Tetris game using Raylib with C and C++
-<img src ="https://github.com/yashwanth2706/Tetris/blob/main/Tetris_Game_Image.png"></img>
+# Tetris game using Raylib with C/C++
+
+<img src="https://raw.githubusercontent.com/yashwanth2706/Tetris/main/demo/tetris-demo.gif" width="500" alt="Tetris Demo">
 
 # Setup: (Windows/Linux/MacOS)
 --------------------------------------------------------------------------------------------------------
