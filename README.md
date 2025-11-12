@@ -1,8 +1,7 @@
-Tetris (raylib)
-=================
+# Tetris game using Raylib with C++
+<img src ="https://github.com/yashwanth2706/Tetris/blob/main/demo\tetris-demo.gif"></img>
 
-Install raylib from:
-https://www.raylib.com/
+## Install raylib from: https://www.raylib.com/ *(Required to compile the game)*
 
 
 This is a Tetris game implemented in C++ using raylib. The repository includes a convenience `setup.py` script that helps find your raylib installation and builds the project on both Windows and Linux.
